@@ -1,0 +1,7 @@
+networkx
+numpy
+matplotlib
+simanneal
+scipy
+setuptools
+numba
