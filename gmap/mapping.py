@@ -1,11 +1,12 @@
-from random import random
+import random
 
 from numba import jit
 from simanneal import Annealer
 import numpy as np
 
 from gmap.matrix_generator import create_communities
-from gmap.utils import swap
+from gmap.utils import *
+from gmap.matrix_generator import create_communities
 
 
 @jit
@@ -59,20 +60,20 @@ class Hardware(Hardware_Annealer):
 
 
 
-class Hardware_multicore(Hardware):
-    def __init__(self, connectivity_matrix, core):
-        self.Mask = 1 - create_communities(len(connectivity_matrix), core)
-        self.buf = np.arange(len(connectivity_matrix))
-        super(Hardware, self).__init__(connectivity_matrix)  # important!
+class Hardware_multicore(Annealer):
+    def __init__(self, state, core):
+        self.buf = np.arange(len(state))
+        self.Mask = 1-create_communities(len(state), core)
+        super(Hardware_multicore, self).__init__(state)  # important!
 
     def move(self):
-        a = random.randint(0, len(self.connectivity_matrix) - 1)
-        b = random.randint(0, len(self.connectivity_matrix) - 1)
-        ret = cost_update_mask_jit(self.connectivity_matrix, self.Mask, a, b)
-        self.state = swap(self.connectivity_matrix, self.buf, a, b)
+        a = random.randint(0, len(self.state) - 1)
+        b = random.randint(0, len(self.state) - 1)
+        ret = cost_update_mask_jit(self.state, self.Mask, a, b)
+        self.state = swap(self.state, self.buf, a, b)
         return ret
 
     def energy(self):
-        return (self.connectivity_matrix * self.Mask).sum()
+        return (self.state * self.Mask).sum()
 
 
