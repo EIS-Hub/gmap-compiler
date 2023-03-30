@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
-from utils import *
-from matrix_generator import *
+from gmap.utils import *
+from gmap.matrix_generator import *
 
 N = 256
 K = 64

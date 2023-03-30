@@ -23,18 +23,56 @@ def cost_update_mask_jit(A, Mask, i, j):
     return update
 
 
-class Hardware_multicore(Annealer):
-    def __init__(self, state, core):
-        self.Mask = 1 - create_communities(len(state), core)
-        self.buf = np.arange(len(state))
-        super(Hardware_multicore, self).__init__(state)  # important!
+class Hardware_Annealer(Annealer):
+    def __init__(self, connectivity_matrix):
+        super(Hardware_Annealer, self).__init__(connectivity_matrix)
 
     def move(self):
-        a = random.randint(0, len(self.state) - 1)
-        b = random.randint(0, len(self.state) - 1)
-        ret = cost_update_mask_jit(self.state, self.Mask, a, b)
-        self.state = swap(self.state, self.buf, a, b)
+        self.update()
+
+    def energy(self):
+        self.cost()
+
+    def update(self):
+        pass
+
+    def cost(self):
+        pass
+
+    def solve(self):
+        self.anneal()
+
+
+class Hardware(Hardware_Annealer):
+    def __init__(self, connectivity_matrix):
+        self.connectivity_matrix = connectivity_matrix
+        super(Hardware, self).__init__(connectivity_matrix)
+
+    def update(self):
+        pass
+
+    def cost(self):
+        pass
+
+    def solve(self):
+        super.solve()
+
+
+
+class Hardware_multicore(Hardware):
+    def __init__(self, connectivity_matrix, core):
+        self.Mask = 1 - create_communities(len(connectivity_matrix), core)
+        self.buf = np.arange(len(connectivity_matrix))
+        super(Hardware, self).__init__(connectivity_matrix)  # important!
+
+    def move(self):
+        a = random.randint(0, len(self.connectivity_matrix) - 1)
+        b = random.randint(0, len(self.connectivity_matrix) - 1)
+        ret = cost_update_mask_jit(self.connectivity_matrix, self.Mask, a, b)
+        self.state = swap(self.connectivity_matrix, self.buf, a, b)
         return ret
 
     def energy(self):
-        return (self.state * self.Mask).sum()
+        return (self.connectivity_matrix * self.Mask).sum()
+
+

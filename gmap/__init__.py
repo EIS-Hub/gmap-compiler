@@ -1,1 +1,4 @@
-from .mapping import Hardware
+
+
+from .mapping import Hardware_multicore
+
