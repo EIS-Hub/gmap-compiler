@@ -58,3 +58,29 @@ def swap(A_new, buf, i, j):
     A_new[:, i] = A_new[:, j]
     A_new[:, j] = buf
     return A_new
+
+
+# Create a reordered matrix along new labels
+def reorder(partitions, A):
+    order_ = np.ndarray.flatten(partitions)
+    A_ord_line = np.zeros_like(A)
+    for i in range(len(order_)):
+        A_ord_line[i] = A[order_[i]]
+    A_ord_col = np.zeros_like(A)
+    for i in range(len(order_)):
+        A_ord_col[:, i] = A_ord_line[:, order_[i]]
+    return A_ord_col
+
+
+# Reorder a list of matrix along a list of labels
+def reorder_list(order, l):
+    return np.array([l[i] for i in order])
+
+
+# Shuffle the label of a network. The network remains the same but not its incidency matrix.
+def shuffle(A):
+    A_new = np.copy(A)
+    arr = np.arange(len(A_new))
+    np.random.shuffle(arr)
+    A_new = reorder(arr, A_new)
+    return A_new

@@ -20,7 +20,7 @@ def create_communities(N, C):
 
 
 # Function that create a Small wolrd Watts Stoggart network.
-def create_WS(N, k_avg, p_drop=0.5):
+def create_WS(N, k_avg, p_drop=0.3):
     A = np.zeros((N, N))
     G = nx.connected_watts_strogatz_graph(N, k_avg, p_drop)
     A[:N, :N] = nx.to_numpy_array(G)  # [K:,K:]

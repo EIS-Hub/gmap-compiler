@@ -1,13 +1,16 @@
 from gmap.matrix_generator import *
-from gmap.utils import *
-from gmap.mapping import *
+from gmap.utils  import *
+from gmap.Hardware import *
 
-A = create_distance_dependant(64, minus_x_exponent(64 / 3, 2), True)
+size_hw = 128
+size_net = int(size_hw*4/5)
+connectivity_matrix = create_WS(N = size_net, k_avg = int(size_net/4)) # create Watts–Strogatz connectivity matrix
+weights = np.random.rand(size_net, size_net)
+connectivity_matrix = shuffle(connectivity_matrix)*weights
 
-sa = Hardware_multicore(A, 4)
-sa.set_schedule({'tmax': 50, 'tmin': 0.01, 'steps': 30000, 'updates': 10})
-A_new, energy = sa.solve()
-plot_matrix(A_new)
+hw = Hardware_multicore(size_hw, core = 4)
+mapping, vioated_constrains = hw.mapping(connectivity_matrix)
+plot_matrix(mapping)
 plt.show()
 
 
