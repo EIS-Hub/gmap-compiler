@@ -17,6 +17,7 @@ See [examples/example_mapping.py](https://github.com/EIS-Hub/gmap-compiler/blob/
 from gmap import Hardware
 from gmap.matrix_generator import create_random
 
+
 class My_Hardware(Hardware):
     """Implementation of a constrained hardware"""
 
