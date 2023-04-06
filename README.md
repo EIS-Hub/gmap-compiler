@@ -14,13 +14,14 @@ pip install -e git+https://github.com/EIS-Hub/gmap-compiler.git  # latest from g
 See [examples/example_mapping.py](https://github.com/EIS-Hub/gmap-compiler/blob/main/examples/example_mapping.py) for examples.
 
 ```python
-from gmap import Hardware
+from gmap import hardware
 from gmap.matrix_generator import create_random
 
 
 class My_Hardware(Hardware):
     """Implementation of a constrained hardware"""
 
-hw = Hardware_multicore(size_hw, core = 4)
+
+hw = Hardware_multicore(size_hw, core=4)
 mapping, vioated_constrains = hw.mapping(connectivity_matrix)
 ```
