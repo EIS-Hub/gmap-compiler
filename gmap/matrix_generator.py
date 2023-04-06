@@ -16,7 +16,7 @@ def create_communities(N, C):
     A = np.zeros((N, N))
     for i in range(C):
         A[(N // C) * i:(N // C) * (i + 1), (N // C) * i:(N // C) * (i + 1)] = 1
-    return A.astype(np.int64)
+    return A.astype(bool)
 
 
 # Function that create a Small wolrd Watts Stoggart network.

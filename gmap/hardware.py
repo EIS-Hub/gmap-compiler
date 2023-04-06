@@ -44,11 +44,68 @@ class Hardware_generic(Hardware):
         self.Mask = 1 - 1 * create_communities(self.n_total, self.n_core)
 
     def violated_fan(self, connectivity_matrix, axis, max_fan):
-        ext_fan = self.Mask * (connectivity_matrix>0)
+        ext_fan = self.Mask * (connectivity_matrix > 0)
         sum_fan = np.sum(ext_fan, axis=axis)
-        return np.sum((sum_fan > max_fan) * sum_fan)
+        return np.sum( (sum_fan-max_fan) * (sum_fan > max_fan) )
 
     def cost(self, connectivity_matrix):
-        violated_FO = self.violated_fan(connectivity_matrix, 0, self.n_fanO)  # Sum along axis 0 (vertically)
-        violated_FI = self.violated_fan(connectivity_matrix, 1, self.n_fanI)  # Sum along axis 1 (horizontally)
+        violated_FI = self.violated_fan(connectivity_matrix, 0, self.n_fanI)  # Sum along axis 0 (vertically = fan-in)
+        violated_FO = self.violated_fan(connectivity_matrix, 1,
+                                        self.n_fanO)  # Sum along axis 1 (horizontally = fan-out)
         return violated_FI + violated_FO
+
+
+class Hardware_DYNAPS(Hardware):
+    def __init__(self, N, F, C, K, M=None, alpha=None):
+        # Either one describe DYNAPS with M or alpha.
+        assert M is None or alpha is None, "Error : Both M and alpha are not None"
+        assert M is not None or alpha is not None, "Error : Both M and alpha are None"
+        if alpha is not None:
+            M = int(np.sqrt((F * np.log2(alpha * N)) / (alpha * np.log2(alpha * C))))
+
+        # Check conditions
+        assert F > M, "Error : Condition F > M not respected"
+        assert F / M <= N / C, "Error : Condition F/M <= N/C not respected"
+        assert M <= C, "Error : Condition M <= C not respected"
+
+        self.N = N
+        self.F = F
+        self.M = M
+        self.C = C
+        self.K = K
+        super(Hardware_DYNAPS, self).__init__(self.N)  # important !
+
+        self.mat_FI = [[1.0 if j == i // self.C else 0.0 for j in range(self.N // self.C)] for i in range(self.N)]
+
+    def violated_mem_sender(self, connectivity_matrix):
+        # Compute the fan in of each neuron to each cluster
+        n_FI = np.dot(connectivity_matrix>0, self.mat_FI)
+
+        # Each neuron can communicate with at most M neurons within a cluster
+        violated_M = np.sum((n_FI - self.M) * (n_FI > self.M))
+
+        # Each neuron can communicate with at most F/M cluster
+        n_FI_cluster = np.count_nonzero(n_FI, axis=1) # compute the number of cluster a neuron is communicating with.
+        max_FI_cluster = self.F // self.M
+        violated_F = np.sum((n_FI_cluster - max_FI_cluster) * (n_FI_cluster > max_FI_cluster))
+
+        return violated_M + violated_F
+
+    def violated_mem_receiver(self, connectivity_matrix):
+        ''' Each cluster can have at most K combination of fan-in, the K tags '''
+        violated_K = 0
+        for i in range(self.N//self.C) :
+            # compute the number of different combination of neurons, the number of required tags.
+            A = (connectivity_matrix>0)[i*self.C:(i+1)*self.C]
+            nonzero_rows = A[np.any(A != 0, axis=1)]
+            unique_nonzero_rows = np.unique(nonzero_rows, axis=0)
+            max_K = unique_nonzero_rows.shape[0]
+
+            # Compare it with the actual max number of tags.
+            violated_K += (max_K-self.K)*(max_K > self.K)
+
+        return violated_K
+
+
+    def cost(self, connectivity_matrix):
+        return self.violated_mem_sender(connectivity_matrix) + self.violated_mem_receiver(connectivity_matrix)
