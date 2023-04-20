@@ -43,7 +43,7 @@ class Hardware:
             connectivity_matrix = swap(connectivity_matrix, self.buf, a, b)
         return connectivity_matrix, dE
 
-    def mapping(self, connectivity_matrix, minutes=0.5, debug=False):
+    def mapping(self, connectivity_matrix, minutes=0.5, debug=False, params=None):
         # pre-check
         if len(connectivity_matrix) > self.n_total:
             return connectivity_matrix, float('inf')
@@ -55,18 +55,21 @@ class Hardware:
         # solving the mapping
         sa = Hardware_Annealer(connectivity_matrix, self.update_move, self.cost, debug=debug)
 
-        # Searching for the good params
-        if debug :print("Searching for the good optimization params...")
-        param = sa.auto(minutes=minutes)
-        param['updates'] = 10
-        sa.set_schedule(param)
+        if params is None:
+            # Searching for the good params
+            if debug: print("Searching for the good optimization params...")
+            params = sa.auto(minutes=minutes)
+            params['updates'] = 10
+        sa.set_schedule(params)
 
         # Solving the mapping
-        if debug : print("Solving the mapping...")
+        if debug: print("Solving the mapping...")
         mapping, violated_constrains = sa.anneal()
 
-        if debug :
-            if violated_constrains == 0: print("Mappable !")
-            else: print("Not Mappable, violated : ", violated_constrains)
+        if debug:
+            if violated_constrains == 0:
+                print("Mappable !")
+            else:
+                print("Not Mappable, violated : ", violated_constrains)
 
         return mapping, violated_constrains

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='gmap-compiler',
-    version='0.2',
+    version='0.3',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -10,6 +10,7 @@ setup(
         'networkx',
         'numba',
         'scipy',
+        'simanneal',
     ],
     author='Jimmy Weber',
     author_email='jimmy.weber@ini.ethz.ch',
@@ -18,3 +19,4 @@ setup(
 )
 
 # To update the package, run "python setup.py sdist"
+# twine upload dist/gmap-compiler-0.3.tar.gz --verbose
