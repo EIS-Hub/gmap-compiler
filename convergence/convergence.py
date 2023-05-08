@@ -48,16 +48,20 @@ plt.rc('font', **font)
 plt.rcParams['lines.linewidth'] = 2
 x_axis = np.linspace(epoch_max//epoch_test, epoch_max, epoch_test).astype(int)
 
-# result = compute_result(4096, filename = './convergence4096_105.csv',  epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=True)
-# plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 4096')
 
-# result = compute_result(1024, filename = './convergence1024_105.csv',  epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
-# plt.plot(1/(np.log(x_axis)), 100*(result[1:]-result[0])/result[1:], label = 'N = 1024')
-#
-# result = compute_result(512, filename = './convergence512_105.csv', epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=True)
-# plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 512')
-#
-result = compute_result(256, filename = './convergence256_105.csv', epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=True)
+result = compute_result(4096, filename = './convergence4096_105.csv',  epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
+plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 4096')
+
+result = compute_result(1024, filename = './convergence2048_105.csv',  epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
+plt.plot(1/(np.log(x_axis)), 100*(result[1:]-result[0])/result[1:], label = 'N = 2048')
+
+result = compute_result(1024, filename = './convergence1024_105.csv',  epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
+plt.plot(1/(np.log(x_axis)), 100*(result[1:]-result[0])/result[1:], label = 'N = 1024')
+
+result = compute_result(512, filename = './convergence512_105.csv', epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
+plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 512')
+
+result = compute_result(256, filename = './convergence256_105.csv', epoch_max = epoch_max, epoch_test = epoch_test, stat_test = 20, compute=False)
 plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 256')
 
 plt.xlabel('Number of steps')
