@@ -11,11 +11,11 @@ pip install -e git+https://github.com/EIS-Hub/gmap-compiler.git  # latest from g
 ```
 
 
-### Use pre-implmented Hardware
+## Use pre-implmented Hardware
 Pre-implemented Hardware are given in example to illustrate how to define the constrains of an Hardware.
 See [examples/example_mapping.py](https://github.com/EIS-Hub/gmap-compiler/blob/main/examples/example_mapping.py) for examples.
 
-#### Multicore Hardware with limited fan-in/fan-out
+### Multicore Hardware with limited fan-in/fan-out
 
 You can map to a generic multicore hardware defined by :
 - The number of neurons per core
@@ -30,7 +30,7 @@ hw = Multicore(n_neurons_core=size_hw // n_core, n_core=n_core, n_fanI=20, n_fan
 mapping, vioated_constrains = hw.map(weight_matrix)
 ```
 
-#### DYNAPSE Chip
+### DYNAPSE Chip
 Or you can map to a more complex contrained Hardware like DYNAPSE :
 
 ```python
@@ -40,11 +40,11 @@ hw = DYNAPSE(N=size_hw, F=8, C=size_hw // n_core, K=16, alpha=1)
 mapping, vioated_constrains = hw.map(weight_matrix)
 ```
 
-#### Others
+### Others
 Let's wait the community to enrich the different hardware.
 
 
-### Build your own Hardware
+## Build your own Hardware
 You can build your own Hardware and map a network on it :
 ```python
 class My_Hardware(Hardware):
@@ -57,7 +57,8 @@ order, mapped_matrix, vioated_constrains = hw.mapping(weight_matrix)
 
 For example, let's build multicore hardware where the number of intercore connections should be minimized.
 Note that form this example, the complexity to compute the cost is not optimized.
-See for full example.
+See [examples/example_mapping_my_hardware.py](https://github.com/EIS-Hub/gmap-compiler/blob/main/examples/example_mapping_my_hardware.py) for examples.
+
 ```python
 class my_Hardware(Hardware):
     """
