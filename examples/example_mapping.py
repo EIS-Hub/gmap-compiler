@@ -1,8 +1,10 @@
 from gmap.matrix.generator import create_WS
-from gmap.matrix.utils import shuffle, plot_matrix
+from gmap.matrix.utils import plot_matrix
+from gmap.mapping import shuffle, Mapping
 from matplotlib import pyplot as plt
 from gmap.hardware import Multicore, DYNAPSE
 import numpy as np
+
 
 # Defining the network to map
 size_net = 220
@@ -27,10 +29,10 @@ n_core = 4
 hw_multicore = Multicore(n_neurons_core = size_hw//n_core, n_core = n_core, max_fanI=15, max_fanO=15)
 
 # Mapping the network onto the Hardware.
-order, mapped_matrix, violated_constrains = hw_multicore.map(weight_matrix, debug=True, minutes=1)
+mapping = hw_multicore.map(weight_matrix, debug=True, minutes=1)
 
 # Plotting the results
-plot_matrix(mapped_matrix)
+plot_matrix(mapping.reordered_connectivity_matrix())
 plt.show()
 
 
@@ -39,9 +41,9 @@ plt.show()
 hw_dynapse = DYNAPSE(N = size_hw, F = 20, C =size_hw // n_core, K = 16, alpha = 1)
 
 # Mapping the network onto the Hardware.
-order, mapped_matrix, violated_constrains = hw_dynapse.map(weight_matrix, debug=True, minutes=1)
+mapping = hw_dynapse.map(weight_matrix, debug=True, minutes=1)
 
 # Plotting the results
-plot_matrix(mapped_matrix)
+plot_matrix(mapping.reordered_connectivity_matrix())
 plt.show()
 

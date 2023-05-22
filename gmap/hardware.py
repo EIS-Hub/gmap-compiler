@@ -1,5 +1,5 @@
 from gmap.compiler import Hardware
-from gmap.matrix.utils import reorder, expected_cost_difference_line
+from gmap.matrix.utils import expected_cost_difference_line
 from gmap.matrix.generator import create_multicore_mask
 import numpy as np
 import math
@@ -158,5 +158,5 @@ class DYNAPSE(Hardware):
 
     def cost(self, mapping):
         # Non optimized way of computing the constraints violated. Complexity of O(N**2).
-        actual_connectivity_matrix = reorder(mapping.order, mapping.connectivity_matrix)
+        actual_connectivity_matrix = mapping.reordered_connectivity_matrix()
         return self.violated_mem_sender(actual_connectivity_matrix) + self.violated_mem_receiver(actual_connectivity_matrix)

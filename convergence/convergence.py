@@ -1,9 +1,9 @@
 from gmap.hardware import Multicore
-from gmap.compiler import Mapping
+from gmap.mapping import Mapping
 from gmap.matrix.generator import create_multicore_mask
 import numpy as np
 from matplotlib import pyplot as plt
-from gmap.matrix.utils import shuffle
+from gmap.mapping import shuffle
 from tqdm import trange
 
 def create_test_matrix(n, c, fan):
@@ -54,11 +54,11 @@ def compute_result(n, filename, epoch_max, epoch_test, stat_test, compute=False)
 
         # Initialize the hardware and get the temperature range
         hw = Multicore(n_neurons_core=n // 4, n_core=4, max_fanI=0, max_fanO=0)
-        T_min, T_max = hw.get_temperature(Mapping(A,A))
+        T_min, T_max = hw.get_temperature(A)
 
         # Run the mapping algorithm once with no updates
         mapping = hw.map(A, params={'tmax': T_max, 'tmin': T_min, 'steps': 0, 'updates': 0})
-        result[0] = mapping['violated_constrains']
+        result[0] = mapping.cost
 
         # Shuffle the matrix for the subsequent iterations
         A = shuffle(A)
@@ -67,8 +67,8 @@ def compute_result(n, filename, epoch_max, epoch_test, stat_test, compute=False)
         for t in trange(stat_test):
             for i, s in enumerate(np.linspace(epoch_max//epoch_test, epoch_max, epoch_test).astype(int)):
                 params = {'tmax': T_max, 'tmin': T_min, 'steps': s, 'updates': 0}
-                order, mapped_matrix, violated_constrains = hw.map(A, params=params)
-                result[i+1] += violated_constrains
+                mapping = hw.map(A, params=params)
+                result[i+1] += mapping.cost
 
         # Average the results over the iterations
         result[1:] /= stat_test
@@ -80,42 +80,7 @@ def compute_result(n, filename, epoch_max, epoch_test, stat_test, compute=False)
     return np.loadtxt(filename, delimiter=',')
 
 
-epoch_test = 50
-epoch_max = 100000
-stat_test = 20
-compute = False
-
-
-fig = plt.figure()
-
-# Set font size
-font = {'size': 14}
-plt.rc('font', **font)
-plt.rcParams['lines.linewidth'] = 2
-x_axis = np.linspace(epoch_max//epoch_test, epoch_max, epoch_test).astype(int)
-
-
-result = compute_result(4096, 'results/convergence4096_105.csv', epoch_max, epoch_test, stat_test, compute)
-plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 4096')
-
-result = compute_result(1024, 'results/convergence2048_105.csv', epoch_max, epoch_test, stat_test, compute)
-plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 2048')
-
-result = compute_result(1024, 'results/convergence1024_105.csv', epoch_max, epoch_test, stat_test, compute)
-plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 1024')
-
-result = compute_result(512, 'results/convergence512_105.csv', epoch_max, epoch_test, stat_test, compute)
-plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 512')
-
-result = compute_result(256, 'results/convergence256_105.csv', epoch_max, epoch_test, stat_test, compute)
-plt.plot(x_axis, 100*(result[1:]-result[0])/result[1:], label = 'N = 256')
-
-plt.xlabel('Number of steps')
-plt.ylabel('Relative error wrt the optimum [%]')
-
-
-plt.plot()
-plt.legend()# Set the number of epochs for testing and the maximum number of epochs to run
+# Set the number of epochs for testing and the maximum number of epochs to run
 epoch_test = 50
 epoch_max = 100000
 

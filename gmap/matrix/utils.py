@@ -67,55 +67,6 @@ def info_graph(A):
     plt.ylabel("Frequency")
 
 
-def reorder(order, A):
-    """
-    A function that reorders the rows and columns of a matrix according
-    to a given order.
-
-    Args:
-    order (array-like): The desired order of the rows and columns.
-    A (array-like): The input matrix to be reordered.
-
-    Returns:
-    A_new (array-like): The reordered matrix.
-    """
-
-    # Reorder the rows of the input matrix according to the given order.
-    A_new = A.take(order, axis=0)
-
-    # Reorder the columns of the reordered matrix according to the given order.
-    A_new = A_new.take(order, axis=1)
-
-    # Return the reordered matrix.
-    return A_new
-
-
-# Shuffle the label of a network. The network remains the same but not its incidency matrix.
-def shuffle(A):
-    """
-    A function that shuffles the rows and columns of a matrix randomly.
-
-    Args:
-    A (array-like): The input matrix to be shuffled.
-
-    Returns:
-    A_new (array-like): The shuffled matrix.
-    """
-
-    # Create a copy of the input matrix to avoid modifying the original.
-    A_new = np.copy(A)
-
-    # Generate a random permutation of indices for the rows and columns.
-    arr = np.arange(len(A_new))
-    np.random.shuffle(arr)
-
-    # Reorder the rows and columns of the matrix according to the random permutation.
-    A_new = reorder(arr, A_new)
-
-    # Return the shuffled matrix.
-    return A_new
-
-
 def expected_cost_difference_line(n, p, func_cost_line):
     """
     Computes the expectation of the difference of cost between two random lines or two random columns

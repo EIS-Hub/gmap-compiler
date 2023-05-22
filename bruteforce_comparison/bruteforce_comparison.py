@@ -1,9 +1,10 @@
 from tqdm import trange
-from gmap.matrix.utils import shuffle
+from gmap.mapping import shuffle
 import numpy as np
 from gmap.hardware import Multicore
 import time
 from matplotlib import pyplot as plt
+from gmap.mapping import Mapping
 
 
 def benchmark(filename, test, hw, sigma, mu, debug=False, compute=False):
@@ -46,13 +47,13 @@ def benchmark(filename, test, hw, sigma, mu, debug=False, compute=False):
                     my_net = shuffle(my_net)
 
                     # Compute the baseline cost
-                    Cost_baseline[sig, m] = hw.cost(my_net)
+                    Cost_baseline[sig, m] = hw.cost(Mapping(my_net))
 
                     # Compute the hardware mapping cost
                     t0 = time.time()
-                    order, mapped_matrix, violated_constrains = hw.map(my_net, minutes=0.1)
+                    mapping = hw.map(my_net, minutes=0.1, debug=debug)
                     tGmap += time.time() - t0
-                    Cost_algo[sig, m] = min(Cost_algo[sig, m], violated_constrains)
+                    Cost_algo[sig, m] = min(Cost_algo[sig, m], mapping.cost)
 
         # Save the results to file
         np.savetxt('./results/Noisy_diagonal_' + filename + "_cost_baseline.csv", Cost_baseline, delimiter=',')
@@ -100,17 +101,17 @@ def plot_comparison(Cost_baseline, Cost_bf, Cost_algo, mu, label, savefig=False)
 
 
 # Set parameters
-compute = False  # Whether to recompute or rely on pre-obtained data
+compute = True  # Whether to recompute or rely on pre-obtained data
 test = 10  # Number of statistical repetitions
 
 # Set up Multicore hardware instances
-hw = Multicore(16, 4)
+hw = Multicore(4, 4)
 # Benchmark for network size of 16 nodes
-Cost_baseline_16, Cost_bf_16, Cost_algo_16 = benchmark('16', test=1, hw=hw, sigma=[2, 3], mu=[1, 6], debug=True, compute=compute)
+Cost_baseline_16, Cost_bf_16, Cost_algo_16 = benchmark('16', test=test, hw=hw, sigma=[2, 3], mu=[1, 6], debug=True, compute=compute)
 
-hw = Multicore(32, 4)
+hw = Multicore(8, 4)
 # Benchmark for network size of 32 nodes
-Cost_baseline_32, Cost_bf_32, Cost_algo_32 = benchmark('32', test=1, hw=hw, sigma=[3, 7], mu=[3, 7], debug=True, compute=compute)
+Cost_baseline_32, Cost_bf_32, Cost_algo_32 = benchmark('32', test=test, hw=hw, sigma=[3, 7], mu=[3, 7], debug=True, compute=compute)
 
 # Benchmark for another network size of 32 nodes
 Cost_baseline_32_bis, Cost_bf_32_bis, Cost_algo_32_bis = benchmark('32_bis', test=1, hw=hw, sigma=[3, 5], mu=[2, 10], debug=True, compute=compute)

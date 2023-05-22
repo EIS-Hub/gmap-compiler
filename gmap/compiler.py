@@ -1,6 +1,7 @@
-import copy
 import random
 from simanneal import Annealer
+
+from gmap.mapping import Mapping
 from gmap.matrix.utils import *
 import time
 import math
@@ -10,7 +11,7 @@ class Hardware_Annealer(Annealer):
     """ Hardware annealer is an annealer designed specifically to anneal hardware.
 
      Parameters:
-        mapping (Mapping) : The network to anneal
+        mapping (gmap.mapping.Mapping) : The network to anneal
         update_move(mapping, i, j) (callable): The function to call at each swap of neurons i and j and that returns dE
         cost(mapping) (callable): The function that returns the energy of a mapping, i.e. the number of violated constraints
     """
@@ -160,36 +161,9 @@ class Hardware_Annealer(Annealer):
         return self.best_mapping, self.best_energy
 
     def energy(self):
-        return self.cost(self.state)
-
-
-class Mapping:
-    """
-    mapping contains the actual data useful for a mapping
-
-    Parameters:
-    order (np.array): The order to apply to connectivity_matrix and to weight_matrix to get the mapping
-    connectivity_matrix (2D np.array): The original unordered connectivity matrix of the network
-    weight_matrix (2D np.array): The original unordered weight matrix of the network
-    cost_tracker : Any object that help to track the actual cost of the actual mapping
-
-    """
-
-    def __init__(self, connectivity_matrix, weight_matrix, cost_tracker=None):
-        self.order = np.arange(len(connectivity_matrix))
-        self.connectivity_matrix = connectivity_matrix
-        self.weight_matrix = weight_matrix
-        self.cost_tracker = cost_tracker
-
-    def copy(self):
-        """
-        Only the order and the cost_tracker has to be copied. They depend on the mapping.
-        The connectivity_matrix and th  weight_matrix are the original unordered ones.
-        """
-        new = Mapping(self.connectivity_matrix, self.weight_matrix)
-        new.order = copy.deepcopy(self.order)
-        new.cost_tracker = copy.deepcopy(self.cost_tracker)
-        return new
+        cost = self.cost(self.state)
+        self.state.cost = cost
+        return cost
 
 
 class Hardware:
@@ -290,9 +264,14 @@ class Hardware:
         # Update the mapping accordingly.
         self.update_cost_tracker(mapping, i, j)
 
-        # Compute the difference of cost.
-        return self.cost(mapping) - E_ini
+        # Cost of the un-mutated mapping.
+        E_fin = self.cost(mapping)
 
+        # Update the mapping cost
+        mapping.cost = E_fin
+
+        # Compute the difference of cost.
+        return E_fin - E_ini
 
     def map(self, weight_matrix, minutes=1, debug=False, params=None, greedy_ratio=0.2):
         """
@@ -319,10 +298,9 @@ class Hardware:
         # Pre-treatment. Zero-pad the network matrix.
         pad = self.n_total - len(weight_matrix)
         weight_matrix = np.pad(weight_matrix, [(0, pad), (0, pad)], mode='constant')
-        connectivity_matrix = 1 * (weight_matrix > 0)
 
         # Initiating the solver
-        initial_mapping = Mapping(connectivity_matrix, weight_matrix)
+        initial_mapping = Mapping(weight_matrix)
         sa = Hardware_Annealer(initial_mapping, self.update_move, self.cost, self.get_temperature, debug=debug)
         sa.copy_strategy = 'method'
         if debug: print("Initial cost : ", self.cost(initial_mapping))
@@ -346,4 +324,4 @@ class Hardware:
             else:
                 print("Not Mappable, violated : ", violated_constrains)
 
-        return mapping.order, reorder(mapping.order, weight_matrix), violated_constrains
+        return mapping
