@@ -25,9 +25,10 @@ You can map to a generic multicore hardware defined by :
 
 ```python
 from gmap.hardware import Multicore
+from gmap.mapping import Mapping
 
 hw = Multicore(n_neurons_core=size_hw // n_core, n_core=n_core, n_fanI=20, n_fanO=20)
-mapping, vioated_constrains = hw.map(weight_matrix)
+mapping = hw.map(weight_matrix)
 ```
 
 ### DYNAPSE Chip
@@ -35,9 +36,10 @@ Or you can map to a more complex contrained Hardware like DYNAPSE :
 
 ```python
 from gmap.hardware import DYNAPSE
+from gmap.mapping import Mapping
 
 hw = DYNAPSE(N=size_hw, F=8, C=size_hw // n_core, K=16, alpha=1)
-mapping, vioated_constrains = hw.map(weight_matrix)
+mapping = hw.map(weight_matrix)
 ```
 
 ### Others
@@ -52,7 +54,7 @@ class My_Hardware(Hardware):
 
 
 hw = My_Hardware()
-order, mapped_matrix, vioated_constrains = hw.mapping(weight_matrix)
+mapping = hw.mapping(weight_matrix)
 ```
 
 For example, let's build multicore hardware where the number of intercore connections should be minimized.
